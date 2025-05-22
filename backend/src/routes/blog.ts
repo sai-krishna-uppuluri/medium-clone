@@ -8,47 +8,48 @@ export const blogRouter = new Hono<{
     DATABASE_URL: string;
     JWT_SECRET: string;
   };
-  variables: {
+  Variables: {
     userId: string;
   };
 }>();
 
-blogRouter.use("/api/v1/blog/*", async (c, next) => {
-  // get the header
+blogRouter.use("/*", async (c, next) => {
   const jwt = (await c.req.header("authorization")) || "";
+  const token = jwt.split(" ")[1] || "";
 
-  if (!jwt) {
-    c.json({ error: "Please signin to view" });
+  try {
+    const payload = await verify(token, c.env.JWT_SECRET);
+    if (payload) {
+      c.set("userId", payload.id);
+      await next();
+    }
+  } catch (error) {
+    return c.json({ error: " unauthorized" });
   }
-
-  // const token = jwt?.split(" "[1]) || "";
-  const payload = await verify(jwt, c.env.JWT_SECRET);
-  //split the header
-  // verify the header
-  // pass it on to the next
-
-  next();
-  return c.text("lll");
 });
 
 blogRouter.post("/", async (c) => {
   const body = await c.req.json();
-
+  const userId = c.get("userId");
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const postDataContent = await prisma.post.create({
-    data: {
-      title: body.title,
-      content: body.content,
-      authorId: body.id,
-    },
-  });
+  try {
+    const postDataContent = await prisma.post.create({
+      data: {
+        title: body.title,
+        content: body.content,
+        authorId: userId,
+      },
+    });
 
-  return c.json({
-    id: postDataContent.id,
-  });
+    return c.json({
+      id: postDataContent.id,
+    });
+  } catch (error) {
+    return c.json({ error: "Could not able to create post at this moment" });
+  }
 });
 
 blogRouter.put("/", async (c) => {
@@ -71,4 +72,33 @@ blogRouter.put("/", async (c) => {
   return c.json({
     id: postDataContent.id,
   });
+});
+
+blogRouter.get("/bulk", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const getAllPosts = await prisma.post.findMany();
+
+  return c.json({ getAllPosts });
+});
+
+blogRouter.get("/:id", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const blogId = c.req.param("id");
+  try {
+    const getPostById = await prisma.post.findFirst({
+      where: {
+        id: blogId,
+      },
+    });
+
+    return c.json({ getPostById });
+  } catch (error) {
+    c.json({ error: "Could Not find the post" });
+  }
 });

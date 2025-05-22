@@ -14,36 +14,26 @@ export const userRouter = new Hono<{
 }>();
 
 userRouter.post("/signup", async (c) => {
-  //console.log("reached prisma client before");
-
-  //console.log(c.env.DATABASE_URL);
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-  //console.log("reach1");
 
   const body = await c.req.json();
-  //console.log("body", body);
 
-  const user = await prisma.user.create({
-    data: {
-      email: body.email,
-      password: body.password,
-    },
-  });
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email: body.email,
+        password: body.password,
+      },
+    });
 
-  //console.log("reached after response");
-
-  const payload = { id: user.id };
-
-  //console.log(payload);
-  //console.log(c.env.JWT_SECRET);
-
-  const jwt = await sign(payload, c.env.JWT_SECRET);
-
-  //console.log("reached after jwt ", jwt);
-
-  return c.json({ jwt });
+    const payload = { id: user.id };
+    const jwt = await sign(payload, c.env.JWT_SECRET);
+    return c.json({ message: "SignUp Successful" });
+  } catch (error) {
+    c.json({ error: "Something went wrong, Try again later" });
+  }
 });
 
 userRouter.post("/signin", async (c) => {
@@ -53,18 +43,35 @@ userRouter.post("/signin", async (c) => {
 
   const body = await c.req.json();
 
-  const findUser = await prisma.user.findUnique({
-    where: {
-      email: body.email,
-    },
-  });
+  try {
+    const findUser = await prisma.user.findUnique({
+      where: {
+        email: body.email,
+        password: body.password,
+      },
+    });
 
-  if (!findUser) {
-    c.status(403);
-    return c.json({ error: "user not found" });
+    if (!findUser) {
+      c.status(403);
+      return c.json({ error: "user not found" });
+    }
+
+    const jwt = await sign({ id: findUser.id }, c.env.JWT_SECRET);
+
+    return c.json({ jwt });
+  } catch (error) {
+    c.json({
+      error: "Something Went Wrong. Try again later (SignIn)",
+    });
   }
+});
 
-  const jwt = await sign({ id: findUser.id }, c.env.JWT_SECRET);
+userRouter.get("/listUsers", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
 
-  return c.json({ jwt });
+  const listOfUsersData = await prisma.user.findMany();
+
+  return c.json({ listOfUsersData });
 });
