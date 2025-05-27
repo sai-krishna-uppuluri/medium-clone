@@ -29,6 +29,10 @@ userRouter.post("/signup", async (c) => {
   }
 
   try {
+    const find_user_existed = await prisma.user.findFirst; //need to be completed to check whether the already signedup user trying to signup again
+  } catch (c) {}
+
+  try {
     const user = await prisma.user.create({
       data: {
         email: body.email,

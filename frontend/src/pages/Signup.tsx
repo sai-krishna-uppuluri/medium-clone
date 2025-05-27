@@ -1,13 +1,13 @@
-import { Auth } from "../components/Auth";
+import { SignupAuth } from "../components/SignupAuth";
 import { Quote } from "../components/Quote";
 
 export const Signup = () => {
   return (
-    <div className="grid grid-cols-2">
+    <div className="grid grid-cols-1 lg:grid-cols-2">
       <div>
-        <Auth />
+        <SignupAuth />
       </div>
-      <div className="invisible md:visible">
+      <div className="hidden lg:block">
         <Quote />
       </div>
     </div>
