@@ -15,7 +15,7 @@ export const SignupAuth = () => {
     password: "",
   });
 
-  const sendRequest = async (req, res) => {
+  const sendRequest = async () => {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/user/signup`,
@@ -26,8 +26,9 @@ export const SignupAuth = () => {
       localStorage.setItem("token", jwt);
 
       navigate("/blog");
-    } catch (res) {
-      return alert(res);
+    } catch (error) {
+      const errorMessage = error?.response.data.error || "Something went wrong";
+      return alert(errorMessage);
     }
   };
 

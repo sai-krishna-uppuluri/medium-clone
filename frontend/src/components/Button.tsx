@@ -1,7 +1,7 @@
 interface ButtonProps {
   type: string;
   width?: string;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const Button = ({ type, width, onClick }: ButtonProps) => {
