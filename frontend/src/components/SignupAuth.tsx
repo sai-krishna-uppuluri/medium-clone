@@ -25,7 +25,7 @@ export const SignupAuth = () => {
       console.log(jwt);
       localStorage.setItem("token", jwt);
 
-      navigate("/blog");
+      navigate("/signin");
     } catch (error) {
       const errorMessage = error?.response.data.error || "Something went wrong";
       return alert(errorMessage);
