@@ -1,12 +1,22 @@
-export const BlogCard = () => {
+interface BlogCardProps {
+  Author: string;
+  title: string;
+  content: string;
+  publishedDate: string;
+}
+
+export const BlogCard = ({
+  Author,
+  title,
+  content,
+  publishedDate,
+}: BlogCardProps) => {
   return (
     <div>
-      <div>
-        <h1> Blog Title </h1>
-        <p> Blog Description </p>
-        <p> Blog Author </p>
-        <p> Blog Published Date </p>
-      </div>
+      <div>{Author}</div>
+      <div>{title}</div>
+      <div>{content}</div>
+      <div>{publishedDate}</div>
     </div>
   );
 };
