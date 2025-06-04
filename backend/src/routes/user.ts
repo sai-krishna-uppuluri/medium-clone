@@ -29,12 +29,25 @@ userRouter.post("/signup", async (c) => {
   }
 
   try {
-    const find_user_existed = await prisma.user.findFirst; //need to be completed to check whether the already signedup user trying to signup again
-  } catch (c) {}
+    //need to be completed to check whether the already signedup user trying to signup again
+    const find_user_existed = await prisma.user.findFirst({
+      where: {
+        email: body.email,
+      },
+    });
+
+    if (find_user_existed) {
+      c.status(409);
+      return c.json({ message: "Email already existed" });
+    }
+  } catch (e) {
+    return c.json({ e: "error while checking" });
+  }
 
   try {
     const user = await prisma.user.create({
       data: {
+        name: body.name,
         email: body.email,
         password: body.password,
       },
@@ -42,9 +55,9 @@ userRouter.post("/signup", async (c) => {
 
     const payload = { id: user.id };
     const jwt = await sign(payload, c.env.JWT_SECRET);
-    return c.json({ message: "SignUp Successful" });
+    return c.json({ jwt });
   } catch (error) {
-    c.json({ error: "Something went wrong, Try again later" });
+    return c.json({ error: "Something went wrong, Try again later" });
   }
 });
 
