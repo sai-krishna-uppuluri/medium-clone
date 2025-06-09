@@ -16,10 +16,11 @@ export const Blog = () => {
       <div className="flex flex-col w-full justify-center items-center content-center">
         {blogs.map((eachBlog) => (
           <BlogCard
+            id={eachBlog.id}
             title={eachBlog.title}
             content={eachBlog.content}
             publishedDate={"March"}
-            Author={eachBlog.Author.name || "Sai krishna"}
+            author={eachBlog.author?.name || "Sai krishna"}
           />
         ))}
       </div>
