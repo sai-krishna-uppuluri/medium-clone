@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 export interface EachBlog {
   content: string;
@@ -46,6 +47,8 @@ export const useBlogs = () => {
   const [loading, setLoading] = useState(true);
   const [blogs, setBlogs] = useState<EachBlog[]>([]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchAllBlogs = async () => {
       setLoading(true);
@@ -57,17 +60,25 @@ export const useBlogs = () => {
           },
         });
         console.log("response", response);
-        setBlogs(response.data.getAllPosts);
-        console.log("reached Here", response.data);
+
+        if (response.data.status !== "success") {
+          console.log("response", response);
+          alert("You are not authorized to view this page");
+          navigate("/signin");
+          return;
+        }
+        return setBlogs(response.data.getAllPosts);
+        //console.log("reached Here", response.data);
       } catch (error) {
-        return Response.json(error);
+        alert("Error fetching blogs");
+        navigate("/signin");
       } finally {
         setLoading(false);
       }
     };
 
     fetchAllBlogs();
-  }, []);
+  }, [navigate]);
 
   return {
     loading,

@@ -114,7 +114,7 @@ blogRouter.get("/bulk", async (c) => {
     },
   });
 
-  return c.json({ getAllPosts });
+  return c.json({ status: "success", getAllPosts });
 });
 
 blogRouter.get("/:id", async (c) => {
